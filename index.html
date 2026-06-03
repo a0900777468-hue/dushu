@@ -51,24 +51,29 @@ body{font-family:var(--font);background:var(--bg);min-height:100vh;display:flex;
 <div class="timer-label">⏳ 倒數計時</div>
 <div class="timer-display" id="countdownDisplay">00:00</div>
 <div class="setup" id="countdownSetup">
-<input type="number" id="cdMin" value="25" min="1" placeholder="分"><span>分</span>
+<input type="number" id="cdMin" value="25" min="0" placeholder="分"><span>分</span>
 <input type="number" id="cdSec" value="0" min="0" max="59" placeholder="秒"><span>秒</span>
 </div>
-<div class="btn-row" id="countdownBtns"><button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button></div>
+<div class="btn-row" id="countdownBtns">
+<button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button>
+</div>
 </div>
 </div>
 <div id="page-timer" class="page">
 <div class="card" id="timerCard">
 <div class="timer-label">⏱ 正計時</div>
 <div class="timer-display" id="timerDisplay">00:00</div>
-<div class="btn-row" id="timerBtns"><button class="btn primary" id="btnStartTimer">▶ 開始</button></div>
+<div class="btn-row" id="timerBtns">
+<button class="btn primary" id="btnStartTimer">▶ 開始</button>
+</div>
 </div>
 </div>
 </div>
 <div class="toast" id="toast"></div>
+
 <script>
 window.onload = function() {
-var COUNTRIES=[{name:"日本",flag:"🇯🇵",hours:3},{name:"韓國",flag:"🇰🇷",hours:2.5},{name:"泰國",flag:"🇹🇭",hours:3.5},{name:"新加坡",flag:"🇸🇬",hours:4.5},{name:"越南",flag:"🇻🇳",hours:3},{name:"印尼",flag:"🇮🇩",hours:5},{name:"印度",flag:"🇮🇳",hours:7},{name:"杜拜",flag:"🇦🇪",hours:8.5},{name:"英國",flag:"🇬🇧",hours:13},{name:"法國",flag:"🇫🇷",hours:13.5},{name:"德國",flag:"🇩🇪",hours:13},{name:"義大利",flag:"🇮🇹",hours:13},{name:"西班牙",flag:"🇪🇸",hours:14},{name:"埃及",flag:"🇪🇬",hours:12},{name:"澳洲",flag:"🇦🇺",hours:9},{name:"美國",flag:"🇺🇸",hours:12},{name:"巴西",flag:"🇧🇷",hours:22},{name:"冰島",flag:"🇮🇸",hours:15},{name:"芬蘭",flag:"🇫🇮",hours:11},{name:"馬爾地夫",flag:"🇲🇻",hours:8}];
+var COUNTRIES=[{name:"日本",flag:"🇯🇵",hours:3},{name:"韓國",flag:"🇰🇷",hours:2.5},{name:"泰國",flag:"🇹🇭",hours:3.5},{name:"新加坡",flag:"🇸🇬",hours:4.5},{name:"越南",flag:"🇻🇳",hours:3},{name:"印尼",flag:"🇮🇩",hours:5},{name:"印度",flag:"🇮🇳",hours:7},{name:"杜拜",flag:"🇦🇪",hours:8.5},{name:"英國",flag:"🇬🇧",hours:13},{name:"法國",flag:"🇫🇷",hours:13.5},{name:"德國",🇩🇪",hours:13},{name:"義大利",flag:"🇮🇹",hours:13},{name:"西班牙",flag:"🇪🇸",hours:14},{name:"埃及",flag:"🇪🇬",hours:12},{name:"澳洲",flag:"🇦🇺",hours:9},{name:"美國",flag:"🇺🇸",hours:12},{name:"巴西",flag:"🇧🇷",hours:22},{name:"冰島",flag:"🇮🇸",hours:15},{name:"芬蘭",flag:"🇫🇮",hours:11},{name:"馬爾地夫",flag:"🇲🇻",hours:8}];
 var roulette=null,cdSec=0,cdRunning=false,cdInterval=null,cdTarget=0;
 var tRunning=false,tInterval=null,tStart=null,tAcc=0;
 
@@ -76,14 +81,27 @@ function $(id){return document.getElementById(id);}
 function fmtTime(sec){sec=Math.max(0,Math.floor(sec));var m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2000);}
 
+// 重新改寫：超安全的切換分頁功能
 function switchTab(name){
-['roulette','countdown','timer'].forEach(function(n){
-$('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.remove('active');
-$('page-'+n).classList.remove('active');
-});
-$('tab'+name.charAt(0).toUpperCase()+name.slice(1)).add('active'); // 修正 AI 的小手誤
-$('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
-$('page-'+name).classList.add('active');
+    // 1. 先把所有按鈕的 active 拔掉，所有頁面隱藏
+    $('tabRoulette').classList.remove('active');
+    $('tabCountdown').classList.remove('active');
+    $('tabTimer').classList.remove('active');
+    $('page-roulette').classList.remove('active');
+    $('page-countdown').classList.remove('active');
+    $('page-timer').classList.remove('active');
+
+    // 2. 根據點擊的名稱，單獨把對應的頁面顯示出來
+    if(name === 'roulette'){
+        $('tabRoulette').classList.add('active');
+        $('page-roulette').classList.add('active');
+    } else if(name === 'countdown') {
+        $('tabCountdown').classList.add('active');
+        $('page-countdown').classList.add('active');
+    } else if(name === 'timer') {
+        $('tabTimer').classList.add('active');
+        $('page-timer').classList.add('active');
+    }
 }
 
 function spinRoulette(){
@@ -101,44 +119,62 @@ var u=$('btnUseRoulette');u.style.display='inline-block';u.textContent='⏳ 用 
 function useRouletteTime(){if(!roulette)return;cdSec=Math.round(roulette.hours*60)*60;switchTab('countdown');updateCdDisplay();toast('🎯 目標：'+roulette.name+' '+roulette.hours+'小時');}
 
 function updateCdDisplay(){$('countdownDisplay').textContent=fmtTime(cdSec);}
+
 function startCountdown(){
-if(cdRunning)return;if(cdSec<=0){var m=parseInt($('cdMin').value)||25;var s=parseInt($('cdSec').value)||0;cdSec=m*60+s;if(cdSec<=0){toast('請設定時間');return;}}
+if(cdRunning)return;
+if(cdSec<=0){
+var m=parseInt($('cdMin').value)||0;
+var s=parseInt($('cdSec').value)||0;
+cdSec=m*60+s;
+if(cdSec<=0){toast('請設定時間');return;}
+}
 cdRunning=true;cdTarget=cdSec;$('countdownSetup').style.display='none';
-$('countdownBtns').innerHTML='<button class="btn" id="btnPauseCd">⏸ 暫停</button><button class="btn" id="btnStopCd" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
-$('btnPauseCd').onclick=pauseCountdown;$('btnStopCd').onclick=stopCountdown;
+renderCountdownBtns();
 cdInterval=setInterval(function(){cdSec--;updateCdDisplay();if(cdSec<=0)stopCountdown();},1000);
 toast('⏳ 倒數開始！');
 }
-function pauseCountdown(){clearInterval(cdInterval);cdRunning=false;
-$('countdownBtns').innerHTML='<button class="btn primary" id="btnResumeCd">▶ 繼續</button><button class="btn" id="btnStopCd2" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
-$('btnResumeCd').onclick=resumeCountdown;$('btnStopCd2').onclick=stopCountdown;}
-function resumeCountdown(){cdRunning=true;
-$('countdownBtns').innerHTML='<button class="btn" id="btnPauseCd2">⏸ 暫停</button><button class="btn" id="btnStopCd3" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
-$('btnPauseCd2').onclick=pauseCountdown;$('btnStopCd3').onclick=stopCountdown;
-cdInterval=setInterval(function(){cdSec--;updateCdDisplay();if(cdSec<=0)stopCountdown();},1000);}
+
+function pauseCountdown(){clearInterval(cdInterval);cdRunning=false;renderCountdownBtns();}
+function resumeCountdown(){cdRunning=true;renderCountdownBtns();cdInterval=setInterval(function(){cdSec--;updateCdDisplay();if(cdSec<=0)stopCountdown();},1000);}
 function stopCountdown(){clearInterval(cdInterval);cdRunning=false;
 if(cdTarget-cdSec>=10){try{var d=JSON.parse(localStorage.getItem('sheep_simple')||'[]');d.push({date:new Date().toISOString().split('T')[0],duration:cdTarget-cdSec});localStorage.setItem('sheep_simple',JSON.stringify(d));}catch(e){}}
-cdSec=0;cdTarget=0;$('countdownSetup').style.display='flex';
-$('countdownBtns').innerHTML='<button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button>';
-$('btnStartCountdown').onclick=startCountdown;updateCdDisplay();toast('✅ 結束');}
+cdSec=0;cdTarget=0;$('countdownSetup').style.display='flex';renderCountdownBtns();updateCdDisplay();toast('✅ 結束');}
+
+function renderCountdownBtns(){
+var box=$('countdownBtns');
+if(!cdRunning && cdSec>0){
+box.innerHTML='<button class="btn primary" id="btnResumeCd">▶ 繼續</button><button class="btn" id="btnStopCd" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnResumeCd').onclick=resumeCountdown;$('btnStopCd').onclick=stopCountdown;
+}else if(cdRunning){
+box.innerHTML='<button class="btn" id="btnPauseCd">⏸ 暫停</button><button class="btn" id="btnStopCd" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnPauseCd').onclick=pauseCountdown;$('btnStopCd').onclick=stopCountdown;
+}else{
+box.innerHTML='<button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button>';
+$('btnStartCountdown').onclick=startCountdown;
+}
+}
 
 function updateTimerDisplay(){var s=tAcc+(tStart?Math.max(0,(Date.now()-tStart)/1000):0);$('timerDisplay').textContent=fmtTime(s);}
-function startTimer(){if(tRunning)return;tRunning=true;tStart=Date.now();
-$('timerBtns').innerHTML='<button class="btn" id="btnPauseTimer">⏸ 暫停</button><button class="btn" id="btnStopTimer" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
-$('btnPauseTimer').onclick=pauseTimer;$('btnStopTimer').onclick=stopTimer;
-tInterval=setInterval(updateTimerDisplay,500);toast('⏱ 開始計時');}
-function pauseTimer(){if(!tRunning)return;tAcc+=Math.max(0,(Date.now()-tStart)/1000);tStart=null;clearInterval(tInterval);
-$('timerBtns').innerHTML='<button class="btn primary" id="btnResumeTimer">▶ 繼續</button><button class="btn" id="btnStopTimer2" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
-$('btnResumeTimer').onclick=resumeTimer;$('btnStopTimer2').onclick=stopTimer;updateTimerDisplay();}
-function resumeTimer(){tRunning=true;tStart=Date.now();
-$('timerBtns').innerHTML='<button class="btn" id="btnPauseTimer2">⏸ 暫停</button><button class="btn" id="btnStopTimer3" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
-$('btnPauseTimer2').onclick=pauseTimer;$('btnStopTimer3').onclick=stopTimer;
-tInterval=setInterval(updateTimerDisplay,500);}
-function stopTimer(){var final=tAcc+(tStart?Math.max(0,(Date.now()-tStart)/1000):0);clearInterval(tInterval);tRunning=false;tStart=null;tAcc=0;
-$('timerBtns').innerHTML='<button class="btn primary" id="btnStartTimer">▶ 開始</button>';$('btnStartTimer').onclick=startTimer;
-$('timerDisplay').textContent='00:00';
+function startTimer(){if(tRunning)return;tRunning=true;tStart=Date.now();renderTimerBtns();tInterval=setInterval(updateTimerDisplay,500);toast('⏱ 開始計時');}
+function pauseTimer(){if(!tRunning)return;tAcc+=Math.max(0,(Date.now()-tStart)/1000);tStart=null;clearInterval(tInterval);tRunning=false;renderTimerBtns();updateTimerDisplay();}
+function resumeTimer(){tRunning=true;tStart=Date.now();renderTimerBtns();tInterval=setInterval(updateTimerDisplay,500);}
+function stopTimer(){var final=tAcc+(tStart?Math.max(0,(Date.now()-tStart)/1000):0);clearInterval(tInterval);tRunning=false;tStart=null;tAcc=0;renderTimerBtns();$('timerDisplay').textContent='00:00';
 if(final>=10){try{var d=JSON.parse(localStorage.getItem('sheep_simple')||'[]');d.push({date:new Date().toISOString().split('T')[0],duration:Math.round(final)});localStorage.setItem('sheep_simple',JSON.stringify(d));}catch(e){}}
 toast(final>=10?'✅ 讀了 '+fmtTime(final):'已結束');}
+
+function renderTimerBtns(){
+var box=$('timerBtns');
+if(!tRunning && tAcc>0){
+box.innerHTML='<button class="btn primary" id="btnResumeTimer">▶ 繼續</button><button class="btn" id="btnStopTimer" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnResumeTimer').onclick=resumeTimer;$('btnStopTimer').onclick=stopTimer;
+}else if(tRunning){
+box.innerHTML='<button class="btn" id="btnPauseTimer">⏸ 暫停</button><button class="btn" id="btnStopTimer" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnPauseTimer').onclick=pauseTimer;$('btnStopTimer').onclick=stopTimer;
+}else{
+box.innerHTML='<button class="btn primary" id="btnStartTimer">▶ 開始</button>';
+$('btnStartTimer').onclick=startTimer;
+}
+}
 
 $('tabRoulette').onclick=function(){switchTab('roulette');};
 $('tabCountdown').onclick=function(){switchTab('countdown');};
