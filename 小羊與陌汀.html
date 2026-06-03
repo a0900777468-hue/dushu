@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="小羊邪修中">
+    <title>🎡 小羊邪修讀書</title>
+    <style>
+        :root {
+            --bg: #faf8f5;
+            --card: #ffffff;
+            --text: #3d3226;
+            --sub: #8b7b6b;
+            --accent: #c4a882;
+            --accent2: #b08a6a;
+            --studying: #7a9e7e;
+            --studying-light: #e8f0e4;
+            --danger: #c97b7b;
+            --border: #e8e0d5;
+            --shadow: 0 2px 16px rgba(80,50,30,0.05);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --font: 'Noto Serif TC','PingFang TC','微軟正黑體',serif;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        body.night-mode {
+            --bg: #1e1b18;
+            --card: #292420;
+            --text: #e8ddd0;
+            --sub: #a89880;
+            --accent: #c4a882;
+            --studying: #6b8a6b;
+            --studying-light: #283528;
+            --danger: #c97b7b;
+            --border: #3d3428;
+            --shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            font-family:var(--font);
+            background:var(--bg);
+            background-image:radial-gradient(ellipse at 25% 15%,rgba(180,150,120,0.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 80%,rgba(130,150,120,0.05) 0%,transparent 55%);
+            min-height:100vh;min-height:100dvh;
+            display:flex;align-items:center;justify-content:center;
+            padding:16px 16px calc(16px + var(--safe-bottom));
+            color:var(--text);
+            user-select:none;-webkit-user-select:none;
+            -webkit-tap-highlight-color:transparent;
+            transition:background 0.5s;
+        }
+        .container{width:100%;max-width:500px;display:flex;flex-direction:column;gap:12px;}
+
+        .header{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+        .header-title{font-size:1.1rem;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
+        .header-btns{display:flex;gap:6px;}
+        .icon-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s;color:var(--text);}
+        .icon-btn:active{transform:scale(0.9);}
+
+        .tabs{display:flex;gap:4px;background:var(--card);border-radius:var(--radius-sm);padding:4px;box-shadow:var(--shadow);border:1.5px solid var(--border);}
+        .tab{flex:1;padding:10px 6px;border-radius:10px;border:none;background:transparent;color:var(--sub);font-size:0.75rem;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:all 0.3s;text-align:center;}
+        .tab.active{background:var(--accent);color:#fff;font-weight:700;}
+
+        .page{display:none;}
+        .page.active{display:block;}
+
+        .roulette-card{background:var(--card);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);border:1.5px solid var(--border);}
+        .roulette-result{font-size:3rem;margin:12px 0;transition:all 0.3s;}
+        .roulette-flag{font-size:3.5rem;display:block;}
+        .roulette-country{font-size:1.4rem;font-weight:700;margin:4px 0;}
+        .roulette-time{font-size:1rem;color:var(--accent2);font-weight:700;}
+        .roulette-btn{padding:12px 28px;border-radius:50px;border:none;background:var(--accent);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.05em;transition:all 0.35s;margin-top:10px;box-shadow:0 4px 16px rgba(180,140,110,0.3);}
+        .roulette-btn:active{transform:scale(0.94);}
+        .roulette-spinning{animation:spin 0.8s ease-out;}
+        @keyframes spin{0%{transform:rotate(0deg);opacity:0.3;}100%{transform:rotate(720deg);opacity:1;}}
+
+        .timer-card{background:var(--card);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);border:2px solid transparent;transition:all 0.4s;}
+        .timer-card.running{border-color:var(--studying);background:var(--studying-light);box-shadow:0 0 28px rgba(122,158,126,0.12),var(--shadow);}
+        .timer-card.paused{border-color:var(--border);}
+        .timer-display{font-size:3rem;font-weight:700;font-variant-numeric:tabular-nums;font-family:'SF Mono','JetBrains Mono','Consolas',monospace;letter-spacing:0.04em;}
+        .timer-label{font-size:0.8rem;color:var(--sub);letter-spacing:0.05em;margin-bottom:6px;}
+        .timer-goal{font-size:0.85rem;color:var(--accent2);font-weight:600;margin-top:4px;}
+        .btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+        .btn{padding:11px 20px;border-radius:50px;border:none;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:all 0.35s;background:var(--card);color:var(--text);border:1.5px solid var(--border);}
+        .btn:active{transform:scale(0.94);}
+        .btn.primary{background:var(--studying);color:#fff;border-color:var(--studying);}
+        .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent);}
+        .btn.danger{color:var(--danger);border-color:#e8d0d0;}
+
+        .countdown-setup{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+        .countdown-setup input{width:56px;border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;font-family:inherit;font-size:1rem;background:var(--bg);color:var(--text);}
+        .countdown-setup input:focus{outline:none;border-color:var(--accent);}
+
+        .goal-row{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:var(--shadow);border:1.5px solid var(--border);font-size:0.8rem;flex-wrap:wrap;}
+        .goal-row input{width:44px;border:2px solid var(--border);border-radius:6px;padding:5px;text-align:center;font-family:inherit;font-size:0.85rem;background:var(--bg);color:var(--text);}
+        .goal-bar-outer{flex:1;min-width:60px;height:6px;background:#ece4d8;border-radius:10px;overflow:hidden;}
+        .goal-bar-inner{height:100%;background:var(--accent);border-radius:10px;transition:width 0.6s;width:0%;}
+
+        .calendar-wrap{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border:1.5px solid var(--border);}
+        .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+        .calendar-month{font-weight:700;font-size:1rem;}
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;}
+        .calendar-day-header{font-size:0.7rem;color:var(--sub);padding:4px 0;}
+        .calendar-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:0.8rem;cursor:default;position:relative;flex-direction:column;gap:1px;}
+        .calendar-day.has-data{background:var(--studying-light);font-weight:700;color:#4a6b4e;}
+        .calendar-day.today{border:2px solid var(--accent);}
+        .calendar-day .day-dot{font-size:0.5rem;color:var(--accent2);}
+        .calendar-nav{background:transparent;border:none;color:var(--accent);font-size:1.2rem;cursor:pointer;padding:4px 8px;}
+
+        .stats-mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+        .stat-mini{background:var(--card);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;box-shadow:var(--shadow);border:1.5px solid transparent;}
+        .stat-mini.highlight{border-color:var(--accent);}
+        .stat-value{font-size:1.2rem;font-weight:700;}
+        .stat-value.accent{color:var(--accent);}
+        .stat-label{font-size:0.65rem;color:var(--sub);letter-spacing:0.04em;}
+
+        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:#3d3226;color:#faf8f5;padding:10px 22px;border-radius:50px;font-size:0.85rem;font-weight:600;z-index:99;transition:transform 0.4s;pointer-events:none;}
+        .toast.show{transform:translateX(-50%) translateY(0);}
+
+        @media(max-width:400px){
+            .timer-display{font-size:2.2rem;}
+            .btn{padding:9px 14px;font-size:0.8rem;}
+            .tab{font-size:0.7rem;padding:8px 4px;}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-title">🎡 <span id="headerTitle">小羊邪修中</span></div>
+        <div class="header-btns">
+            <button class="icon-btn" id="btnNight" title="切換模式">🌙</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('roulette',this)">🎡 邪修</button>
+        <button class="tab" onclick="switchTab('countdown',this)">⏳ 倒數</button>
+        <button class="tab" onclick="switchTab('timer',this)">⏱ 正計</button>
+        <button class="tab" onclick="switchTab('calendar',this)">📅 月曆</button>
+    </div>
+
+    <div id="page-roulette" class="page active">
+        <div class="roulette-card">
+            <div class="roulette-result" id="rouletteDisplay">
+                <span class="roulette-flag">🌍</span>
+                <div class="roulette-country">點擊轉盤</div>
+                <div class="roulette-time">抽一個國家吧</div>
+            </div>
+            <button class="roulette-btn" id="btnRoulette" onclick="spinRoulette()">🎡 轉！</button>
+            <div style="margin-top:12px;">
+                <button class="btn accent" id="btnUseRoulette" onclick="useRouletteTime()" style="display:none;">⏳ 用這個時間倒數</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="
