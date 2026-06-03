@@ -1,120 +1,136 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="小羊邪修中">
-    <title>🎡 小羊邪修讀書</title>
-    <style>
-        :root {
-            --bg: #faf8f5; --card: #ffffff; --text: #3d3226; --sub: #8b7b6b; --accent: #c4a882; --accent2: #b08a6a;
-            --studying: #7a9e7e; --studying-light: #e8f0e4; --danger: #c97b7b; --border: #e8e0d5;
-            --shadow: 0 2px 16px rgba(80,50,30,0.05); --radius: 20px; --radius-sm: 12px;
-            --font: 'Noto Serif TC','PingFang TC','微軟正黑體',serif; --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-        body.night-mode {
-            --bg: #1e1b18; --card: #292420; --text: #e8ddd0; --sub: #a89880; --accent: #c4a882;
-            --studying: #6b8a6b; --studying-light: #283528; --danger: #c97b7b; --border: #3d3428;
-            --shadow: 0 2px 20px rgba(0,0,0,0.3);
-        }
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:var(--font);background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px 16px calc(16px + var(--safe-bottom));color:var(--text);user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:background 0.5s;}
-        .container{width:100%;max-width:500px;display:flex;flex-direction:column;gap:12px;}
-        .header{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-        .header-title{font-size:1.1rem;font-weight:700;letter-spacing:0.04em;display:flex;align-items:center;gap:8px;}
-        .icon-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s;color:var(--text);}
-        .icon-btn:active{transform:scale(0.9);}
-        .tabs{display:flex;gap:4px;background:var(--card);border-radius:var(--radius-sm);padding:4px;box-shadow:var(--shadow);border:1.5px solid var(--border);}
-        .tab{flex:1;padding:10px 6px;border-radius:10px;border:none;background:transparent;color:var(--sub);font-size:0.75rem;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:all 0.3s;text-align:center;}
-        .tab.active{background:var(--accent);color:#fff;font-weight:700;}
-        .page{display:none;}
-        .page.active{display:block;}
-        .roulette-card{background:var(--card);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);border:1.5px solid var(--border);}
-        .roulette-flag{font-size:3.5rem;display:block;}
-        .roulette-country{font-size:1.4rem;font-weight:700;margin:4px 0;}
-        .roulette-time{font-size:1rem;color:var(--accent2);font-weight:700;}
-        .roulette-btn{padding:12px 28px;border-radius:50px;border:none;background:var(--accent);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.05em;margin-top:10px;box-shadow:0 4px 16px rgba(180,140,110,0.3);}
-        .roulette-btn:active{transform:scale(0.94);}
-        .roulette-spinning{animation:spin 0.8s ease-out;}
-        @keyframes spin{0%{transform:rotate(0deg);opacity:0.3;}100%{transform:rotate(720deg);opacity:1;}}
-        .timer-card{background:var(--card);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow);border:2px solid transparent;transition:all 0.4s;}
-        .timer-card.running{border-color:var(--studying);background:var(--studying-light);box-shadow:0 0 28px rgba(122,158,126,0.12),var(--shadow);}
-        .timer-display{font-size:3rem;font-weight:700;font-family:'SF Mono','Consolas',monospace;letter-spacing:0.04em;}
-        .timer-label{font-size:0.8rem;color:var(--sub);letter-spacing:0.05em;margin-bottom:6px;}
-        .timer-goal{font-size:0.85rem;color:var(--accent2);font-weight:600;margin-top:4px;}
-        .btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
-        .btn{padding:11px 20px;border-radius:50px;border:none;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:all 0.35s;background:var(--card);color:var(--text);border:1.5px solid var(--border);}
-        .btn:active{transform:scale(0.94);}
-        .btn.primary{background:var(--studying);color:#fff;border-color:var(--studying);}
-        .btn.accent{background:var(--accent);color:#fff;border-color:var(--accent);}
-        .btn.danger{color:var(--danger);border-color:#e8d0d0;}
-        .countdown-setup{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
-        .countdown-setup input{width:56px;border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;font-family:inherit;font-size:1rem;background:var(--bg);color:var(--text);}
-        .goal-row{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:var(--shadow);border:1.5px solid var(--border);font-size:0.8rem;flex-wrap:wrap;}
-        .goal-row input{width:44px;border:2px solid var(--border);border-radius:6px;padding:5px;text-align:center;font-family:inherit;font-size:0.85rem;background:var(--bg);color:var(--text);}
-        .goal-bar-outer{flex:1;min-width:60px;height:6px;background:#ece4d8;border-radius:10px;overflow:hidden;}
-        .goal-bar-inner{height:100%;background:var(--accent);border-radius:10px;transition:width 0.6s;width:0%;}
-        .calendar-wrap{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);border:1.5px solid var(--border);}
-        .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-        .calendar-month{font-weight:700;font-size:1rem;}
-        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;}
-        .calendar-day-header{font-size:0.7rem;color:var(--sub);padding:4px 0;}
-        .calendar-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:0.8rem;flex-direction:column;gap:1px;}
-        .calendar-day.has-data{background:var(--studying-light);font-weight:700;color:#4a6b4e;}
-        .calendar-day.today{border:2px solid var(--accent);}
-        .calendar-day .day-dot{font-size:0.5rem;color:var(--accent2);}
-        .calendar-nav{background:transparent;border:none;color:var(--accent);font-size:1.2rem;cursor:pointer;padding:4px 8px;}
-        .stats-mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-        .stat-mini{background:var(--card);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;box-shadow:var(--shadow);border:1.5px solid transparent;}
-        .stat-mini.highlight{border-color:var(--accent);}
-        .stat-value{font-size:1.2rem;font-weight:700;}
-        .stat-value.accent{color:var(--accent);}
-        .stat-label{font-size:0.65rem;color:var(--sub);letter-spacing:0.04em;}
-        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:#3d3226;color:#faf8f5;padding:10px 22px;border-radius:50px;font-size:0.85rem;font-weight:600;z-index:99;transition:transform 0.4s;pointer-events:none;}
-        .toast.show{transform:translateX(-50%) translateY(0);}
-        @media(max-width:400px){.timer-display{font-size:2.2rem;}.btn{padding:9px 14px;font-size:0.8rem;}.tab{font-size:0.7rem;padding:8px 4px;}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎡 小羊讀書</title>
+<style>
+:root{--bg:#faf8f5;--card:#fff;--text:#3d3226;--sub:#8b7b6b;--accent:#c4a882;--studying:#7a9e7e;--border:#e8e0d5;--radius:20px;--radius-sm:12px;--font:'PingFang TC','微軟正黑體',sans-serif}
+body.night{--bg:#1e1b18;--card:#292420;--text:#e8ddd0;--sub:#a89880;--accent:#c4a882;--studying:#6b8a6b;--border:#3d3428}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;color:var(--text);user-select:none;-webkit-tap-highlight-color:transparent}
+.container{width:100%;max-width:500px;display:flex;flex-direction:column;gap:12px}
+.tabs{display:flex;gap:4px;background:var(--card);border-radius:var(--radius-sm);padding:4px;box-shadow:0 2px 16px rgba(80,50,30,0.05);border:1.5px solid var(--border)}
+.tab{flex:1;padding:10px 6px;border-radius:10px;border:none;background:transparent;color:var(--sub);font-size:.75rem;cursor:pointer;font-family:inherit;text-align:center}
+.tab.active{background:var(--accent);color:#fff;font-weight:700}
+.page{display:none}
+.page.active{display:block}
+.card{background:var(--card);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:0 2px 16px rgba(80,50,30,0.05);border:1.5px solid var(--border)}
+.flag{font-size:3.5rem}
+.country{font-size:1.4rem;font-weight:700;margin:4px 0}
+.time{font-size:1rem;color:#b08a6a;font-weight:700}
+.btn{padding:11px 20px;border-radius:50px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .35s;background:var(--card);color:var(--text);border:1.5px solid var(--border)}
+.btn:active{transform:scale(.94)}
+.btn.primary{background:var(--studying);color:#fff;border-color:var(--studying)}
+.btn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.timer-display{font-size:3rem;font-weight:700;font-family:'SF Mono',Consolas,monospace}
+.timer-label{font-size:.8rem;color:var(--sub);margin-bottom:6px}
+.setup{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.setup input{width:56px;border:2px solid var(--border);border-radius:8px;padding:8px;text-align:center;font-family:inherit;font-size:1rem;background:var(--bg);color:var(--text)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:#3d3226;color:#faf8f5;padding:10px 22px;border-radius:50px;font-size:.85rem;font-weight:600;z-index:99;transition:transform .4s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <div class="header-title">🎡 <span id="headerTitle">小羊邪修中</span></div>
-        <button class="icon-btn" id="btnNight" title="切換模式">🌙</button>
-    </div>
-    <div class="tabs">
-        <button class="tab active" id="tabRoulette">🎡 邪修</button>
-        <button class="tab" id="tabCountdown">⏳ 倒數</button>
-        <button class="tab" id="tabTimer">⏱ 正計</button>
-        <button class="tab" id="tabCalendar">📅 月曆</button>
-    </div>
-    <div id="page-roulette" class="page active">
-        <div class="roulette-card">
-            <div id="rouletteDisplay"><span class="roulette-flag">🌍</span><div class="roulette-country">點擊轉盤</div><div class="roulette-time">抽一個國家吧</div></div>
-            <button class="roulette-btn" id="btnRoulette">🎡 轉！</button>
-            <div style="margin-top:12px;"><button class="btn accent" id="btnUseRoulette" style="display:none;">⏳ 用這個時間倒數</button></div>
-        </div>
-    </div>
-    <div id="page-countdown" class="page">
-        <div class="timer-card" id="countdownCard">
-            <div class="timer-label">⏳ 倒數計時</div>
-            <div class="timer-display" id="countdownDisplay">00:00</div>
-            <div class="timer-goal" id="countdownGoal"></div>
-            <div class="countdown-setup" id="countdownSetup">
-                <input type="number" id="cdMin" value="25" min="1" max="999" placeholder="分"><span>分</span>
-                <input type="number" id="cdSec" value="0" min="0" max="59" placeholder="秒"><span>秒</span>
-            </div>
-            <div class="btn-row" id="countdownBtns"><button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button></div>
-        </div>
-    </div>
-    <div id="page-timer" class="page">
-        <div class="timer-card" id="timerCard">
-            <div class="timer-label">⏱ 正計時</div>
-            <div class="timer-display" id="timerDisplay">00:00</div>
-            <div class="btn-row" id="timerBtns"><button class="btn primary" id="btnStartTimer">▶ 開始</button></div>
-        </div>
-        <div class="goal-row" style="margin-top:10px;">
-            <span>🎯 今日目標</span><input type="number" id="goalInput" value="4" min="1" max="16"><span>小時</span>
-            <div class="goal-bar-outer"><div class="goal-b
+<div class="tabs">
+<button class="tab active" id="tabRoulette">🎡 邪修</button>
+<button class="tab" id="tabCountdown">⏳ 倒數</button>
+<button class="tab" id="tabTimer">⏱ 正計</button>
+</div>
+<div id="page-roulette" class="page active">
+<div class="card">
+<div id="rouletteDisplay"><span class="flag">🌍</span><div class="country">點擊轉盤</div><div class="time">抽一個國家吧</div></div>
+<button class="btn accent" id="btnRoulette" style="margin-top:10px;">🎡 轉！</button>
+<div style="margin-top:10px"><button class="btn primary" id="btnUseRoulette" style="display:none">⏳ 用這個時間倒數</button></div>
+</div>
+</div>
+<div id="page-countdown" class="page">
+<div class="card" id="countdownCard">
+<div class="timer-label">⏳ 倒數計時</div>
+<div class="timer-display" id="countdownDisplay">00:00</div>
+<div class="setup" id="countdownSetup">
+<input type="number" id="cdMin" value="25" min="1" placeholder="分"><span>分</span>
+<input type="number" id="cdSec" value="0" min="0" max="59" placeholder="秒"><span>秒</span>
+</div>
+<div class="btn-row" id="countdownBtns"><button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button></div>
+</div>
+</div>
+<div id="page-timer" class="page">
+<div class="card" id="timerCard">
+<div class="timer-label">⏱ 正計時</div>
+<div class="timer-display" id="timerDisplay">00:00</div>
+<div class="btn-row" id="timerBtns"><button class="btn primary" id="btnStartTimer">▶ 開始</button></div>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+var COUNTRIES=[{name:"日本",flag:"🇯🇵",hours:3},{name:"韓國",flag:"🇰🇷",hours:2.5},{name:"泰國",flag:"🇹🇭",hours:3.5},{name:"新加坡",flag:"🇸🇬",hours:4.5},{name:"越南",flag:"🇻🇳",hours:3},{name:"印尼",flag:"🇮🇩",hours:5},{name:"印度",flag:"🇮🇳",hours:7},{name:"杜拜",flag:"🇦🇪",hours:8.5},{name:"英國",flag:"🇬🇧",hours:13},{name:"法國",flag:"🇫🇷",hours:13.5},{name:"德國",flag:"🇩🇪",hours:13},{name:"義大利",flag:"🇮🇹",hours:13},{name:"西班牙",flag:"🇪🇸",hours:14},{name:"埃及",flag:"🇪🇬",hours:12},{name:"澳洲",flag:"🇦🇺",hours:9},{name:"美國",flag:"🇺🇸",hours:12},{name:"巴西",flag:"🇧🇷",hours:22},{name:"冰島",flag:"🇮🇸",hours:15},{name:"芬蘭",flag:"🇫🇮",hours:11},{name:"馬爾地夫",flag:"🇲🇻",hours:8}];
+var roulette=null,cdSec=0,cdRunning=false,cdInterval=null,cdTarget=0;
+var tRunning=false,tInterval=null,tStart=null,tAcc=0;
+
+function $(id){return document.getElementById(id);}
+function fmtTime(sec){sec=Math.max(0,Math.floor(sec));var m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2000);}
+
+function switchTab(name){
+['roulette','countdown','timer'].forEach(function(n){
+$('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.remove('active');
+$('page-'+n).classList.remove('active');
+});
+$('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
+$('page-'+name).classList.add('active');
+}
+
+function spinRoulette(){
+var btn=$('btnRoulette');btn.disabled=true;btn.textContent='轉動中...';
+var d=$('rouletteDisplay');d.style.animation='spin 0.8s ease-out';
+var i=0;var iv=setInterval(function(){
+var c=COUNTRIES[Math.floor(Math.random()*COUNTRIES.length)];
+d.innerHTML='<span class="flag">'+c.flag+'</span><div class="country">'+c.name+'</div><div class="time">約 '+c.hours+' 小時</div>';
+i++;if(i>12){clearInterval(iv);roulette=c;d.style.animation='';
+btn.disabled=false;btn.textContent='🎡 再轉一次';
+var u=$('btnUseRoulette');u.style.display='inline-block';u.textContent='⏳ 用 '+c.hours+' 小時倒數';}
+},80);
+}
+
+function useRouletteTime(){if(!roulette)return;cdSec=Math.round(roulette.hours*60)*60;switchTab('countdown');updateCdDisplay();toast('🎯 目標：'+roulette.name+' '+roulette.hours+'小時');}
+
+function updateCdDisplay(){$('countdownDisplay').textContent=fmtTime(cdSec);}
+function startCountdown(){
+if(cdRunning)return;if(cdSec<=0){var m=parseInt($('cdMin').value)||25;var s=parseInt($('cdSec').value)||0;cdSec=m*60+s;if(cdSec<=0){toast('請設定時間');return;}}
+cdRunning=true;cdTarget=cdSec;$('countdownSetup').style.display='none';
+$('countdownBtns').innerHTML='<button class="btn" id="btnPauseCd">⏸ 暫停</button><button class="btn" id="btnStopCd" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnPauseCd').onclick=pauseCountdown;$('btnStopCd').onclick=stopCountdown;
+cdInterval=setInterval(function(){cdSec--;updateCdDisplay();if(cdSec<=0)stopCountdown();},1000);
+toast('⏳ 倒數開始！');
+}
+function pauseCountdown(){clearInterval(cdInterval);cdRunning=false;
+$('countdownBtns').innerHTML='<button class="btn primary" id="btnResumeCd">▶ 繼續</button><button class="btn" id="btnStopCd2" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnResumeCd').onclick=resumeCountdown;$('btnStopCd2').onclick=stopCountdown;}
+function resumeCountdown(){cdRunning=true;
+$('countdownBtns').innerHTML='<button class="btn" id="btnPauseCd2">⏸ 暫停</button><button class="btn" id="btnStopCd3" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnPauseCd2').onclick=pauseCountdown;$('btnStopCd3').onclick=stopCountdown;
+cdInterval=setInterval(function(){cdSec--;updateCdDisplay();if(cdSec<=0)stopCountdown();},1000);}
+function stopCountdown(){clearInterval(cdInterval);cdRunning=false;
+if(cdTarget-cdSec>=10){try{var d=JSON.parse(localStorage.getItem('sheep_simple')||'[]');d.push({date:new Date().toISOString().split('T')[0],duration:cdTarget-cdSec});localStorage.setItem('sheep_simple',JSON.stringify(d));}catch(e){}}
+cdSec=0;cdTarget=0;$('countdownSetup').style.display='flex';
+$('countdownBtns').innerHTML='<button class="btn primary" id="btnStartCountdown">▶ 開始倒數</button>';
+$('btnStartCountdown').onclick=startCountdown;updateCdDisplay();toast('✅ 結束');}
+
+function updateTimerDisplay(){var s=tAcc+(tStart?Math.max(0,(Date.now()-tStart)/1000):0);$('timerDisplay').textContent=fmtTime(s);}
+function startTimer(){if(tRunning)return;tRunning=true;tStart=Date.now();
+$('timerBtns').innerHTML='<button class="btn" id="btnPauseTimer">⏸ 暫停</button><button class="btn" id="btnStopTimer" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnPauseTimer').onclick=pauseTimer;$('btnStopTimer').onclick=stopTimer;
+tInterval=setInterval(updateTimerDisplay,500);toast('⏱ 開始計時');}
+function pauseTimer(){if(!tRunning)return;tAcc+=Math.max(0,(Date.now()-tStart)/1000);tStart=null;clearInterval(tInterval);
+$('timerBtns').innerHTML='<button class="btn primary" id="btnResumeTimer">▶ 繼續</button><button class="btn" id="btnStopTimer2" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnResumeTimer').onclick=resumeTimer;$('btnStopTimer2').onclick=stopTimer;updateTimerDisplay();}
+function resumeTimer(){tRunning=true;tStart=Date.now();
+$('timerBtns').innerHTML='<button class="btn" id="btnPauseTimer2">⏸ 暫停</button><button class="btn" id="btnStopTimer3" style="color:#c97b7b;border-color:#e8d0d0">⏹ 結束</button>';
+$('btnPauseTimer2').onclick=pauseTimer;$('btnStopTimer3').onclick=stopTimer;
+tInterval=setInterval(updateTimerDisplay,500);}
+function stopTimer(){var final=tAcc+(tStart?Math.max(0,(Date.now()-tStart)/1000):0);clearInterval(tInterval);tRunning=false;tStart=null;tAcc=0;
