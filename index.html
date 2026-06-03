@@ -67,7 +67,7 @@ body{font-family:var(--font);background:var(--bg);min-height:100vh;display:flex;
 </div>
 <div class="toast" id="toast"></div>
 <script>
-(function(){
+window.onload = function() {
 var COUNTRIES=[{name:"日本",flag:"🇯🇵",hours:3},{name:"韓國",flag:"🇰🇷",hours:2.5},{name:"泰國",flag:"🇹🇭",hours:3.5},{name:"新加坡",flag:"🇸🇬",hours:4.5},{name:"越南",flag:"🇻🇳",hours:3},{name:"印尼",flag:"🇮🇩",hours:5},{name:"印度",flag:"🇮🇳",hours:7},{name:"杜拜",flag:"🇦🇪",hours:8.5},{name:"英國",flag:"🇬🇧",hours:13},{name:"法國",flag:"🇫🇷",hours:13.5},{name:"德國",flag:"🇩🇪",hours:13},{name:"義大利",flag:"🇮🇹",hours:13},{name:"西班牙",flag:"🇪🇸",hours:14},{name:"埃及",flag:"🇪🇬",hours:12},{name:"澳洲",flag:"🇦🇺",hours:9},{name:"美國",flag:"🇺🇸",hours:12},{name:"巴西",flag:"🇧🇷",hours:22},{name:"冰島",flag:"🇮🇸",hours:15},{name:"芬蘭",flag:"🇫🇮",hours:11},{name:"馬爾地夫",flag:"🇲🇻",hours:8}];
 var roulette=null,cdSec=0,cdRunning=false,cdInterval=null,cdTarget=0;
 var tRunning=false,tInterval=null,tStart=null,tAcc=0;
@@ -81,6 +81,7 @@ function switchTab(name){
 $('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.remove('active');
 $('page-'+n).classList.remove('active');
 });
+$('tab'+name.charAt(0).toUpperCase()+name.slice(1)).add('active'); // 修正 AI 的小手誤
 $('tab'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
 $('page-'+name).classList.add('active');
 }
@@ -134,3 +135,19 @@ $('timerBtns').innerHTML='<button class="btn" id="btnPauseTimer2">⏸ 暫停</bu
 $('btnPauseTimer2').onclick=pauseTimer;$('btnStopTimer3').onclick=stopTimer;
 tInterval=setInterval(updateTimerDisplay,500);}
 function stopTimer(){var final=tAcc+(tStart?Math.max(0,(Date.now()-tStart)/1000):0);clearInterval(tInterval);tRunning=false;tStart=null;tAcc=0;
+$('timerBtns').innerHTML='<button class="btn primary" id="btnStartTimer">▶ 開始</button>';$('btnStartTimer').onclick=startTimer;
+$('timerDisplay').textContent='00:00';
+if(final>=10){try{var d=JSON.parse(localStorage.getItem('sheep_simple')||'[]');d.push({date:new Date().toISOString().split('T')[0],duration:Math.round(final)});localStorage.setItem('sheep_simple',JSON.stringify(d));}catch(e){}}
+toast(final>=10?'✅ 讀了 '+fmtTime(final):'已結束');}
+
+$('tabRoulette').onclick=function(){switchTab('roulette');};
+$('tabCountdown').onclick=function(){switchTab('countdown');};
+$('tabTimer').onclick=function(){switchTab('timer');};
+$('btnRoulette').onclick=spinRoulette;
+$('btnUseRoulette').onclick=useRouletteTime;
+$('btnStartCountdown').onclick=startCountdown;
+$('btnStartTimer').onclick=startTimer;
+};
+</script>
+</body>
+</html>
